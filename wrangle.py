@@ -3,12 +3,11 @@ import pandas as pd
 import env as e
 
 
-def get_zillow():
+def wrangle_zillow():
     """
     This function reads the Zillow data from a cached CSV file if it exists,
-    or from a SQL database if it doesn't exist. If it doesn't exist, it will
-    create the csv for future usage It then renames the columns to more
-    descriptive names and drops all Null values.
+    or from a SQL database if it doesn't exist. It then renames the columns
+    to more descriptive names.
 
     Args:
     - None
@@ -44,14 +43,66 @@ def get_zillow():
             "bedroomcnt": "beds",
             "bathroomcnt": "baths",
             "calculatedfinishedsquarefeet": "sqfeet",
-            "taxvaluedollarcnt": "tax_value",
+            "taxvaluedollarcnt": "prop_value",
             "taxamount": "prop_tax",
             "fips": "county",
         }
     )
-    # Drop nulls, since it is less than 1%
-    # Before Drop NA: 2,152,863
-    # After Drop NA: 2,140,235
-    # Total Dropped: 12,628 (0.006)
-    df = df.dropna()
+    # Map county codes to county names
+    county_map = {6037: "LA", 6059: "Orange", 6111: "Ventura"}
+    df["county"] = df["county"].replace(county_map)
+
+    # Convert columns to int data type
+    df = df.astype(
+        {"year": int, "beds": int, "sqfeet": int, "prop_value": int, "prop_tax": int}
+    )
+
+    # Drop rows with missing values in specific columns
+    df = df.dropna(subset=["year", "beds", "baths", "sqfeet", "prop_value", "prop_tax"])
+
     return df
+
+
+def check_columns(df_telco):
+    """
+    This function takes a pandas dataframe as input and returns
+    a dataframe with information about each column in the dataframe. For
+    each column, it returns the column name, the number of
+    unique values in the column, the unique values themselves,
+    the number of null values in the column, the proportion of null values,
+    and the data type of the column. The resulting dataframe is sorted by the
+    'Number of Unique Values' column in ascending order.
+
+    Args:
+    - df_telco: pandas dataframe
+
+    Returns:
+    - pandas dataframe
+    """
+    data = []
+    # Loop through each column in the dataframe
+    for column in df_telco.columns:
+        # Append the column name, number of unique values, unique values, number of null values, proportion of null values, and data type to the data list
+        data.append(
+            [
+                column,
+                df_telco[column].nunique(),
+                df_telco[column].unique(),
+                df_telco[column].isna().sum(),
+                df_telco[column].isna().mean(),
+                df_telco[column].dtype,
+            ]
+        )
+    # Create a pandas dataframe from the data list, with column names 'Column Name', 'Number of Unique Values', 'Unique Values', 'Number of Null Values', 'Proportion of Null Values', and 'dtype'
+    # Sort the resulting dataframe by the 'Number of Unique Values' column in ascending order
+    return pd.DataFrame(
+        data,
+        columns=[
+            "Column Name",
+            "Number of Unique Values",
+            "Unique Values",
+            "Number of Null Values",
+            "Proportion of Null Values",
+            "dtype",
+        ],
+    ).sort_values(by="Number of Unique Values")
