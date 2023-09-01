@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import env as e
 from sklearn.preprocessing import QuantileTransformer
+from sklearn.model_selection import train_test_split
 
 
 def wrangle_zillow():
@@ -155,4 +156,17 @@ def quantiler(train, validate, test):
     test[scale] = qt.transform(test[scale])
 
     # return the scaled data
+    return train, validate, test
+
+
+def split_data(df):
+    """Split into train, validate, test with a 60% train, 20% validate, 20% test"""
+    train_validate, test = train_test_split(df, test_size=0.2, random_state=123)
+    train, validate = train_test_split(train_validate, test_size=0.25, random_state=123)
+
+    print(f"train: {len(train)} ({round(len(train)/len(df)*100)}% of {len(df)})")
+    print(
+        f"validate: {len(validate)} ({round(len(validate)/len(df)*100)}% of {len(df)})"
+    )
+    print(f"test: {len(test)} ({round(len(test)/len(df)*100)}% of {len(df)})")
     return train, validate, test
