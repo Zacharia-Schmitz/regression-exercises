@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import env as e
+from sklearn.preprocessing import QuantileTransformer
 
 
 def wrangle_zillow():
@@ -48,6 +49,10 @@ def wrangle_zillow():
             "fips": "county",
         }
     )
+
+    # Drop rows with missing values in specific columns
+    df = df.dropna(subset=["year", "beds", "baths", "sqfeet", "prop_value", "prop_tax"])
+
     # Map county codes to county names
     county_map = {6037: "LA", 6059: "Orange", 6111: "Ventura"}
     df["county"] = df["county"].replace(county_map)
@@ -56,10 +61,6 @@ def wrangle_zillow():
     df = df.astype(
         {"year": int, "beds": int, "sqfeet": int, "prop_value": int, "prop_tax": int}
     )
-
-    # Drop rows with missing values in specific columns
-    df = df.dropna(subset=["year", "beds", "baths", "sqfeet", "prop_value", "prop_tax"])
-
     return df
 
 
@@ -105,4 +106,53 @@ def check_columns(df_telco):
             "Proportion of Null Values",
             "dtype",
         ],
-    ).sort_values(by="Number of Unique Values")
+    )
+
+
+from sklearn.preprocessing import QuantileTransformer
+
+
+def quantiler(train, validate, test):
+    """
+    This function scales the train, validate, and test data using QuantileTransformer.
+    It returns the scaled versions of each.
+    Be sure to only learn the parameters for scaling from your training data!
+
+    Parameters:
+    -----------
+    train : pandas DataFrame
+        The training dataset to be scaled.
+    validate : pandas DataFrame
+        The validation dataset to be scaled.
+    test : pandas DataFrame
+        The test dataset to be scaled.
+
+    Returns:
+    --------
+    train : pandas DataFrame
+        The scaled training dataset.
+    validate : pandas DataFrame
+        The scaled validation dataset.
+    test : pandas DataFrame
+        The scaled test dataset.
+
+    Example:
+    --------
+    # call the function
+    train_scaled, validate_scaled, test_scaled = quantiler(train, validate, test)
+    """
+    # create an instance of QuantileTransformer with normal distribution
+    qt = QuantileTransformer(output_distribution="normal")
+
+    # define the columns to be scaled
+    scale = ["year", "beds", "baths", "sqfeet", "prop_value", "prop_tax"]
+
+    # fit and transform the train data
+    train[scale] = qt.fit_transform(train[scale])
+
+    # transform the validate and test data
+    validate[scale] = qt.transform(validate[scale])
+    test[scale] = qt.transform(test[scale])
+
+    # return the scaled data
+    return train, validate, test
