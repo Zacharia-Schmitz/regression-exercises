@@ -3,6 +3,7 @@ import pandas as pd
 import env as e
 from sklearn.preprocessing import QuantileTransformer
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 
 def wrangle_zillow():
@@ -170,3 +171,35 @@ def split_data(df):
     )
     print(f"test: {len(test)} ({round(len(test)/len(df)*100)}% of {len(df)})")
     return train, validate, test
+
+
+def box_plotter(df):
+    """
+    Generates a box plot for all columns in a dataframe using matplotlib.
+    """
+    for col in df.columns:
+        try:
+            plt.figure(figsize=(6, 1))
+            plt.boxplot(df[col], vert=False)
+            plt.title(col)
+            plt.show()
+            q1 = df[col].quantile(0.25)
+            q3 = df[col].quantile(0.75)
+            iqr = q3 - q1
+            lower_bound = q1 - 1.5 * iqr
+            upper_bound = q3 + 1.5 * iqr
+            print(
+                f"Number of results in lower quartile: {len(df[df[col] < lower_bound])}"
+            )
+            print(
+                f"Number of results in inner quartile: {len(df[(df[col] >= lower_bound) & (df[col] <= upper_bound)])}"
+            )
+            print(
+                f"Number of results in upper quartile: {len(df[df[col] > upper_bound])}"
+            )
+        except:
+            print(
+                f"Error: Could not generate box plot for column {col}. Skipping to next column..."
+            )
+            plt.close()
+            continue

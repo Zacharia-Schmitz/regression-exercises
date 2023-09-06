@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import sklearn.preprocessing
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import RobustScaler, StandardScaler
 
 
 def robust_scaler(df, cols=None):
@@ -32,6 +32,30 @@ def robust_scaler(df, cols=None):
         df[cols] = scaler.fit_transform(df[cols])
 
     # Return the modified dataframe
+    return df
+
+
+def standard_scaler(df, cols):
+    """
+    Scales the columns in a dataframe using StandardScaler.
+    Takes in a dataframe and a list of columns to scale.
+    Returns the scaled dataframe.
+    """
+    # create an instance of the StandardScaler class
+    scaler = StandardScaler()
+
+    # fit the scaler to the columns to be scaled
+    scaler.fit(df[cols])
+
+    # transform the columns to be scaled using the fitted scaler
+    scaled_cols = scaler.transform(df[cols])
+
+    # create a new dataframe with the scaled columns
+    scaled_df = pd.DataFrame(scaled_cols, columns=cols, index=df.index)
+
+    # replace the original columns with the scaled columns in the original dataframe
+    df[cols] = scaled_df[cols]
+
     return df
 
 
