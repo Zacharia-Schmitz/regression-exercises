@@ -189,13 +189,13 @@ def box_plotter(df):
             lower_bound = q1 - 1.5 * iqr
             upper_bound = q3 + 1.5 * iqr
             print(
-                f"Number of results in lower quartile: {len(df[df[col] < lower_bound])}"
+                f"Number of results in lower quartile: {len(df[df[col] < lower_bound])} ({(len(df[df[col] < lower_bound])/len(df))*100:.2f}%)"
             )
             print(
-                f"Number of results in inner quartile: {len(df[(df[col] >= lower_bound) & (df[col] <= upper_bound)])}"
+                f"Number of results in inner quartile: {len(df[(df[col] >= lower_bound) & (df[col] <= upper_bound)])} ({(len(df[(df[col] >= lower_bound) & (df[col] <= upper_bound)])/len(df))*100:.2f}%)"
             )
             print(
-                f"Number of results in upper quartile: {len(df[df[col] > upper_bound])}"
+                f"Number of results in upper quartile: {len(df[df[col] > upper_bound])} ({(len(df[df[col] > upper_bound])/len(df))*100:.2f}%)"
             )
         except:
             print(
@@ -203,3 +203,6 @@ def box_plotter(df):
             )
             plt.close()
             continue
+
+
+f""
