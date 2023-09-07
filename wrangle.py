@@ -31,7 +31,6 @@ def wrangle_zillow():
                                    bathroomcnt,
                                    calculatedfinishedsquarefeet,
                                    taxvaluedollarcnt,
-                                   taxamount,
                                    fips
                             FROM properties_2017
                             WHERE propertylandusetypeid = 261""",  # 261 is single family residential id
